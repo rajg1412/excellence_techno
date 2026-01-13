@@ -4,6 +4,8 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import { signToken } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
     try {
         await dbConnect();
@@ -14,7 +16,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'Invalid credentials' }, { status: 400 });
         }
 
-        
+
         if (email === 'krish@gmail.com' && user.role !== 'admin') {
             user.role = 'admin';
             await user.save();
