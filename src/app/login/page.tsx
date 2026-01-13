@@ -5,23 +5,32 @@ import { useRouter } from 'next/navigation';
 export default function LoginPage() {
     const [form, setForm] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const res = await fetch('/api/auth/login', {
-            method: 'POST',
-            body: JSON.stringify(form),
-            headers: { 'Content-Type': 'application/json' },
-        });
-        if (res.ok) {
-            const data = await res.json();
-            localStorage.setItem('user', JSON.stringify(data.user));
-            router.push('/profile');
-            router.refresh();
-        } else {
-            const data = await res.json();
-            setError(data.message);
+        setLoading(true);
+        setError('');
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                body: JSON.stringify(form),
+                headers: { 'Content-Type': 'application/json' },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem('user', JSON.stringify(data.user));
+                router.push('/profile');
+                router.refresh();
+            } else {
+                const data = await res.json();
+                setError(data.message);
+                setLoading(false);
+            }
+        } catch (err) {
+            setError('Something went wrong. Please try again.');
+            setLoading(false);
         }
     };
 
@@ -48,8 +57,19 @@ export default function LoginPage() {
                         style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', background: 'var(--bg-dark)', border: '1px solid var(--glass-border)', color: 'white' }}
                     />
                 </div>
-                <button type="submit" style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', background: 'var(--primary)', color: 'white', fontWeight: 'bold' }}>
-                    Login
+                <button
+                    type="submit"
+                    disabled={loading}
+                    style={{
+                        width: '100%',
+                        padding: '0.75rem',
+                        borderRadius: '0.5rem',
+                        background: loading ? 'var(--text-muted)' : 'var(--primary)',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        cursor: loading ? 'not-allowed' : 'pointer'
+                    }}>
+                    {loading ? 'Logging in...' : 'Login'}
                 </button>
                 <p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>
                     Don't have an account? <a href="/register" style={{ color: 'var(--primary)' }}>Register</a>

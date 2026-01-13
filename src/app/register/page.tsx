@@ -5,20 +5,29 @@ import { useRouter } from 'next/navigation';
 export default function RegisterPage() {
     const [form, setForm] = useState({ name: '', email: '', password: '' });
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const res = await fetch('/api/auth/register', {
-            method: 'POST',
-            body: JSON.stringify(form),
-            headers: { 'Content-Type': 'application/json' },
-        });
-        if (res.ok) {
-            router.push('/login');
-        } else {
-            const data = await res.json();
-            setError(data.message);
+        setLoading(true);
+        setError('');
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                body: JSON.stringify(form),
+                headers: { 'Content-Type': 'application/json' },
+            });
+            if (res.ok) {
+                router.push('/login');
+            } else {
+                const data = await res.json();
+                setError(data.message);
+                setLoading(false);
+            }
+        } catch (err) {
+            setError('Something went wrong. Please try again.');
+            setLoading(false);
         }
     };
 
@@ -54,8 +63,20 @@ export default function RegisterPage() {
                         style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', background: 'var(--bg-dark)', border: '1px solid var(--glass-border)', color: 'white' }}
                     />
                 </div>
-                <button type="submit" style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', background: 'var(--primary)', color: 'white', fontWeight: 'bold', transition: '0.2s' }}>
-                    Register
+                <button
+                    type="submit"
+                    disabled={loading}
+                    style={{
+                        width: '100%',
+                        padding: '0.75rem',
+                        borderRadius: '0.5rem',
+                        background: loading ? 'var(--text-muted)' : 'var(--primary)',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        transition: '0.2s',
+                        cursor: loading ? 'not-allowed' : 'pointer'
+                    }}>
+                    {loading ? 'Creating Account...' : 'Register'}
                 </button>
                 <p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>
                     Already have an account? <a href="/login" style={{ color: 'var(--primary)' }}>Login</a>
