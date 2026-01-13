@@ -4,6 +4,8 @@ import User from '@/models/User';
 import Profile from '@/models/Profile';
 import { getAuthUser } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 // GET profile
 export async function GET(req: NextRequest) {
     try {
